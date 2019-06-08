@@ -3,6 +3,8 @@ from Bio.Blast import NCBIXML
 from Bio import Entrez
 from Bio import SeqIO
 from typing import List
+
+
 class Genome:
     """
     A class that represents a singular genome parsed from the Genbank file.
