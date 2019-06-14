@@ -1,47 +1,7 @@
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
 from Bio import Entrez
-
-class Genome:
-    """
-    A class that represents a singular genome parsed from the Genbank file.
-
-    organism_name: name of the organism
-    genbank_genome: the entire genome from the genbank file
-
-    """
-    def __init__(self, genbank_genome: list) -> None:
-        self.organism_name = ""
-        self.genbank_genome = genbank_genome
-
-    def get_organism_name(self):
-        for line in self.genbank_genome:
-            if "ORGANISM" in line:
-                self.organism_name = line.replace("  ORGANISM", "")
-
-    def print_name_and_genome(self):
-        print(f"*****{self.organism_name} Genome*****")
-        print(self.genbank_genome)
-
-    def find_locus_tag(self) -> list:
-        for item in refseqs:
-            for i in range(len(self.genbank_genome)):
-                if item in line:
-                    return self._search_for_locus_tag()
-
-    def _search_for_locus_tag(self) -> list:
-        loci = []
-        j = 0
-        while j <= 5:
-            j += 1
-            if "old_locus_tag" in self.genbank_genome[i - 1]:
-                quotes = []
-                for j, char1 in enumerate(self.genbank_genome[i - 1]):
-                    if char1 == '"':
-                        quotes.append(j)
-                    locus = self.genbank_genome[i - 1][quotes[0] + 1:quotes[1]]
-                    loci.append(locus)
-        return loci
+from Genome import Genome
 
 
 protein_sequence = input("Please enter the FASTA of the protein you would like "
