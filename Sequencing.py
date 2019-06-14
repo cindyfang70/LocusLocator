@@ -1,9 +1,6 @@
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
 from Bio import Entrez
-from Bio import SeqIO
-from typing import List
-
 
 class Genome:
     """
@@ -13,9 +10,14 @@ class Genome:
     genbank_genome: the entire genome from the genbank file
 
     """
-    def __init__(self, organism_name: str, genbank_genome: list) -> None:
-        self.organism_name = organism_name
+    def __init__(self, genbank_genome: list) -> None:
+        self.organism_name = ""
         self.genbank_genome = genbank_genome
+
+    def get_organism_name(self):
+        for line in self.genbank_genome:
+            if "ORGANISM" in line:
+                self.organism_name = line.replace("  ORGANISM", "")
 
     def print_name_and_genome(self):
         print(f"*****{self.organism_name} Genome*****")
@@ -42,8 +44,6 @@ class Genome:
         return loci
 
 
-
-
 protein_sequence = input("Please enter the FASTA of the protein you would like "
                          "to BLAST: ")
 print("Parsing....", flush=True)
@@ -52,13 +52,13 @@ print("Parsing....", flush=True)
 and RefSeq ID
 """
 result_handle = NCBIWWW.qblast("tblastn", "nr", protein_sequence)
-with open("my_blast.xml", "w") as out_handle:
+with open("./data/my_blast.xml", "w") as out_handle:
     out_handle.write(result_handle.read())
 result_handle.close()
-result_handle = open("my_blast.xml")
+result_handle = open("./data/my_blast.xml")
 blast_record = NCBIXML.parse(result_handle)
-print("***********Results************")
-f = open('my_blast.xml', 'r')
+print("***********Results************", flush=True)
+f = open('./data/my_blast.xml', 'r')
 ids = []
 for line in f:
     if "Hit_id>gi" in line:
@@ -71,14 +71,14 @@ for line in f:
 
 # blastp the query sequence to find refseq ids of similar proteins
 result_handle = NCBIWWW.qblast("blastp", "nr", protein_sequence)
-with open("my_blastp.xml", "w") as out_handle:
+with open("./data/my_blastp.xml", "w") as out_handle:
     out_handle.write(result_handle.read())
 result_handle.close()
-result_handle = open("my_blastp.xml")
+result_handle = open("./data/my_blastp.xml")
 blast_record = NCBIXML.parse(result_handle)
-f = open("my_blastp.xml", "r")
+f = open("./data/my_blastp.xml", "r")
 refseqs = []
-print("*******RefSeqs********")
+print("*******RefSeqs********", flush=True)
 for line in f:
     if "Hit_id" in line and "ref" in line:
         bars = []
@@ -86,7 +86,7 @@ for line in f:
             if char == "|":
                 bars.append(i)
         refseq = line[bars[0]+1:bars[1]]
-        print(refseq)
+        print(refseq, flush=True)
         refseqs.append(refseq)
 
 # Get the genbank files of all the similar proteins
@@ -95,47 +95,43 @@ for line in f:
 Entrez.email = "cindyfang70@gmail.com"
 with open("my_genbank.xml", "w") as out_handle_2:
     for _id in ids:
-        print(_id)
+        print(_id, flush=True)
         result_handle_2 = Entrez.efetch(db="nucleotide", id=_id, rettype="gb",
                                       retmode="text")
         out_handle_2.write(result_handle_2.read())
         result_handle_2.close()
-        print(result_handle_2)
-
-print("*******organism names + loci*******")
+        print(result_handle_2, flush=True)
 
 with open("my_genbank.xml", "r") as genbank:
     lines = genbank.read().splitlines()
 organism_names = []
 temp_locus = ""
 genomes = []
-genome = []
-for i in range(len(lines)):
+
+i = 0
+while i < len(lines):
+    genome = []
     if "/locus" in lines[i]:
         temp_locus = lines[i][11:-1]
+    i += 1
 
-    if "/organism" in lines[i]:
-        line = lines[i].strip()[11:-1]
-        if line not in organism_names:
-            organism_names.append(line)
-        if "ACCESSION" in lines[i]:
-            genome.append(lines[i-1:i+1])
-            i += 1
-        while i < len(lines) and "ACCESSION" not in lines[i]:
-            genome.append(lines[i])
-            i += 1
-        genomes.append(genome)
-        genome.append(lines[i])
+j = 0
+while j < len(lines):
+    if "DEFINITION" in lines[j] and "complete genome" in lines[j]:
+        print("this should be the definition of the genome", flush=True)
+        print(lines[j-1:j+2], flush=True)
+        genome.append(lines[j-1:j+2])
+        j += 2
+        while j < len(lines) and "ACCESSION" not in lines[j]:
+            genome.append(lines[j])
+            j += 1
+        new_genome = Genome(genome)
+        new_genome.get_organism_name()
+        genomes.append(new_genome)
 
-result_genomes = []
-for i in range(len(genomes)):
-    new_genome = Genome(organism_names[i], genomes[i])
-    result_genomes.append(new_genome)
-
-print(result_genomes)
-for genome in result_genomes:
+for genome in genomes:
     genome.print_name_and_genome()
-    print(genome.find_locus_tag())
+    print(genome.find_locus_tag(), flush=True)
 
 
 
