@@ -2,6 +2,7 @@ from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
 from Bio import Entrez
 from Genome import Genome
+import xml.etree.ElementTree as ET
 
 
 protein_sequence = input("Please enter the FASTA of the protein you would like "
@@ -53,7 +54,8 @@ for line in f:
 
 
 Entrez.email = "cindyfang70@gmail.com"
-with open("my_genbank.xml", "w") as out_handle_2:
+print("****** ids ********")
+with open("my_genbank.gb", "w") as out_handle_2:
     for _id in ids:
         print(_id, flush=True)
         result_handle_2 = Entrez.efetch(db="nucleotide", id=_id, rettype="gb",
@@ -62,7 +64,12 @@ with open("my_genbank.xml", "w") as out_handle_2:
         result_handle_2.close()
         print(result_handle_2, flush=True)
 
-with open("my_genbank.xml", "r") as genbank:
+# parsing the genbank file using an xml parser
+tree = ET.parse("my_genbank.gb")
+root = tree.getroot()
+
+# parsing the genbank file without an xml parser
+with open("my_genbank.gb", "r") as genbank:
     lines = genbank.read().splitlines()
 organism_names = []
 temp_locus = ""
@@ -74,7 +81,6 @@ while i < len(lines):
     if "/locus" in lines[i]:
         temp_locus = lines[i][11:-1]
     i += 1
-
 j = 0
 while j < len(lines):
     if "DEFINITION" in lines[j] and "complete genome" in lines[j]:
@@ -91,6 +97,7 @@ while j < len(lines):
 
 for genome in genomes:
     genome.print_name_and_genome()
+
     print(genome.find_locus_tag(), flush=True)
 
 
