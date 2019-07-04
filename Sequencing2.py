@@ -51,10 +51,8 @@ print(refseqs)
 
 # Get the genbank files of all the similar proteins
 Entrez.email = "cindyfang70@gmail.com"
-print("****** ids ********")
 with open("my_genbank.gb", "w") as out_handle_2:
     for _id in ids:
-        print(_id, flush=True)
         result_handle_2 = Entrez.efetch(db="nucleotide", id=_id, rettype="gb",
                                       retmode="text")
         out_handle_2.write(result_handle_2.read())
@@ -62,15 +60,33 @@ with open("my_genbank.gb", "w") as out_handle_2:
         print(result_handle_2, flush=True)
 
 all_genomes = []
+wanted_loci = {}
 with open("my_genbank.gb", "rU") as handle:
     for record in SeqIO.parse(handle, "genbank"):
-        genome = Genome(record, refseqs)
-        all_genomes.append(genome)
+        # genome = Genome(record, refseqs)
+        # all_genomes.append(genome)
+        for feature in record.features:
+            if feature.type =="CDS":
+                for line in feature.type:
+                    ßprint(line)
+
 
 for genome in all_genomes:
     genome.get_organism_name()
-    print("************LOCUS TAG!!!!!**************")
+    print("************LOCUS TAG**************")
     print(genome.find_locus_tag())
 
 
 
+"""
+locus tags don't match up with refseq ids (refseq ids do not appear in the
+genomes of the organisms)
+
+difference between tblastn and blastp 
+
+how are the results of tblastn and blastp related 
+
+get only locus tags related to the refseq ids 
+
+
+"""
