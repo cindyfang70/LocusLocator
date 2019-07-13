@@ -2,7 +2,6 @@ from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
 from Bio import Entrez
 from Bio import SeqIO
-from Genome import Genome
 import xml.etree.ElementTree as ET
 
 
@@ -51,26 +50,119 @@ print(refseqs)
 
 # Get the genbank files of all the similar proteins
 Entrez.email = "cindyfang70@gmail.com"
-print("****** ids ********")
 with open("my_genbank.gb", "w") as out_handle_2:
     for _id in ids:
-        print(_id, flush=True)
         result_handle_2 = Entrez.efetch(db="nucleotide", id=_id, rettype="gb",
                                       retmode="text")
         out_handle_2.write(result_handle_2.read())
         result_handle_2.close()
         print(result_handle_2, flush=True)
 
-all_genomes = []
+# refseqs =  ['WP_028357638.1', 'WP_032962436.1', 'WP_126980089.1', 'WP_126708169.1', 'WP_081462204.1', 'WP_126705769.1', 'WP_106448375.1', 'WP_013516228.1', 'WP_068832127.1', 'WP_049360089.1', 'WP_068832973.1', 'WP_014743597.1', 'WP_051629968.1', 'WP_044587254.1', 'XP_001301229.1', 'WP_036972373.1']
+print("*****Matches:*****")
+results = []
 with open("my_genbank.gb", "rU") as handle:
     for record in SeqIO.parse(handle, "genbank"):
-        genome = Genome(record, refseqs)
-        all_genomes.append(genome)
+        # genome = Genome(record, refseqs)
+        # all_genomes.append(genome)
+        for feature in record.features:
+            if feature.type == "source":
+                if "organism" in feature.qualifiers:
+                    temp_organism_name = feature.qualifiers["organism"][0]
+            if feature.type == "CDS":
+                if "locus_tag" in feature.qualifiers:
+                    temp_locus = feature.qualifiers["locus_tag"][0]
+                if "inference" in feature.qualifiers:
+                    for refseq in refseqs:
+                        if refseq in feature.qualifiers["inference"][0]:
+                            result = (temp_organism_name, temp_locus,
+                                      refseq)
+                            results.append(result)
+                            print(result)
 
-for genome in all_genomes:
-    genome.get_organism_name()
-    print("************LOCUS TAG!!!!!**************")
-    print(genome.find_locus_tag())
+
+def convert_to_int(locus_tag: str) -> tuple:
+    numbers_in_id = ""
+    chars_before_numbers = ""
+    for i in range(len(locus_tag)):
+        chars_before_numbers = chars_before_numbers + locus_tag[i]
+        if locus_tag[i] == "_":
+            underscore_index = i
+            break
+    for i in range(underscore_index + 1, len(locus_tag)):
+        if locus_tag[i].isnumeric() and i > underscore_index:
+            numbers_in_id = numbers_in_id + locus_tag[i]
+    return int(numbers_in_id), chars_before_numbers
+
+
+def find_upstream(locus_tup: tuple) -> list:
+    i = 0
+    new_locus_numbers = []
+    locus_numbers = locus_tup[0]
+    while i < 10:
+        i += 1
+        locus_numbers += 5
+        new_locus = str(locus_numbers)
+        new_locus = locus_tup[1] + new_locus
+        new_locus_numbers.append(new_locus)
+    return new_locus_numbers
+
+
+def find_downstream(locus_tup: tuple) -> list:
+    i = 0
+    new_locus_numbers = []
+    locus_numbers = locus_tup[0]
+    while i < 10:
+        i += 1
+        locus_numbers -= 5
+        new_locus = str(locus_numbers)
+        new_locus = locus_tup[1] + new_locus
+        new_locus_numbers.append(new_locus)
+    return new_locus_numbers
+
+
+def find_protein_products(locus_tags: list) -> list:
+    protein_products = []
+    with open("my_genbank.gb", "rU") as handle:
+        for record in SeqIO.parse(handle, "genbank"):
+            for feature in record.features:
+                if feature.type == "CDS":
+                    for locus in locus_tags:
+                        if feature.qualifiers["locus_tag"][0] == locus:
+                            protein_products.append((locus,
+                                                     feature.qualifiers
+                                                     ["product"][0]))
+
+    return protein_products
+
+
+for result in results:
+    print("upstream locus tags:")
+    print(find_protein_products(find_upstream(convert_to_int(result[1]))))
+    print("downstream locus tags")
+    print(find_protein_products(find_downstream(convert_to_int(result[1]))))
 
 
 
+
+
+
+
+"""
+how to identify if the protein is in a morphogenetic region?
+
+find locus tags of refseq id and +/-15 without blasting (given genome)
+read product of locus tags 
+
+flowchart
+
+lambda phage 
+hk97 phage
+mu phage 
+p22 phage 
+p2 phage 
+spp1 phage 
+
+read genomic arrangement for phages
+
+"""
