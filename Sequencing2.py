@@ -58,14 +58,20 @@ with open("my_genbank.gb", "w") as out_handle_2:
         result_handle_2.close()
         print(result_handle_2, flush=True)
 
+<<<<<<< HEAD
 # refseqs =  ['WP_028357638.1', 'WP_032962436.1', 'WP_126980089.1', 'WP_126708169.1', 'WP_081462204.1', 'WP_126705769.1', 'WP_106448375.1', 'WP_013516228.1', 'WP_068832127.1', 'WP_049360089.1', 'WP_068832973.1', 'WP_014743597.1', 'WP_051629968.1', 'WP_044587254.1', 'XP_001301229.1', 'WP_036972373.1']
 print("*****Matches:*****")
 results = []
+=======
+all_genomes = []
+wanted_loci = {}
+>>>>>>> 9ce45d87ce8f2c49101948a593d8e5cb16e49b8e
 with open("my_genbank.gb", "rU") as handle:
     for record in SeqIO.parse(handle, "genbank"):
         # genome = Genome(record, refseqs)
         # all_genomes.append(genome)
         for feature in record.features:
+<<<<<<< HEAD
             if feature.type == "source":
                 if "organism" in feature.qualifiers:
                     temp_organism_name = feature.qualifiers["organism"][0]
@@ -80,6 +86,17 @@ with open("my_genbank.gb", "rU") as handle:
                             results.append(result)
                             print(result)
 
+=======
+            if feature.type =="CDS":
+                for line in feature.type:
+                    ßprint(line)
+
+
+for genome in all_genomes:
+    genome.get_organism_name()
+    print("************LOCUS TAG**************")
+    print(genome.find_locus_tag())
+>>>>>>> 9ce45d87ce8f2c49101948a593d8e5cb16e49b8e
 
 def convert_to_int(locus_tag: str) -> tuple:
     numbers_in_id = ""
@@ -95,6 +112,7 @@ def convert_to_int(locus_tag: str) -> tuple:
     return int(numbers_in_id), chars_before_numbers
 
 
+<<<<<<< HEAD
 def find_upstream(locus_tup: tuple) -> list:
     i = 0
     new_locus_numbers = []
@@ -164,5 +182,17 @@ p2 phage
 spp1 phage 
 
 read genomic arrangement for phages
+=======
+"""
+locus tags don't match up with refseq ids (refseq ids do not appear in the
+genomes of the organisms)
+
+difference between tblastn and blastp 
+
+how are the results of tblastn and blastp related 
+
+get only locus tags related to the refseq ids 
+
+>>>>>>> 9ce45d87ce8f2c49101948a593d8e5cb16e49b8e
 
 """
