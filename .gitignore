@@ -6,3 +6,10 @@ my_genbank.gb
 my_blast.xml
 my_blasp.xml
 my_genbank.xml
+
+__pycache__/*
+sequence1.gb
+sequence2.gb
+fastas.txt
+blast.py
+
