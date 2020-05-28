@@ -97,33 +97,60 @@ def convert_to_int(locus_tag: str) -> tuple:
     for i in range(underscore_index + 1, len(locus_tag)):
         if locus_tag[i].isnumeric() and i > underscore_index:
             numbers_in_id = numbers_in_id + locus_tag[i]
-    return int(numbers_in_id), chars_before_numbers
-
-
-def find_upstream(locus_tup: tuple) -> list:
-    i = 0
-    new_locus_numbers = []
-    locus_numbers = locus_tup[0]
-    while i < 10:
-        i += 1
-        locus_numbers += 5
-        new_locus = str(locus_numbers)
-        new_locus = locus_tup[1] + new_locus
-        new_locus_numbers.append(new_locus)
-    return new_locus_numbers
+    return numbers_in_id, chars_before_numbers
 
 
 def find_downstream(locus_tup: tuple) -> list:
     i = 0
     new_locus_numbers = []
     locus_numbers = locus_tup[0]
+    j = 0
+    if locus_numbers[0] == "0":
+        for j in range(len(locus_numbers)):
+            j += 1
+            if locus_numbers[j] != "0":
+                break
+    locus_num = int(locus_numbers)
     while i < 10:
         i += 1
-        locus_numbers -= 5
-        new_locus = str(locus_numbers)
+        locus_num += 5
+        if j > 0:
+            new_locus = handle_leading_zeroes(locus_num, j)
+        else:
+            new_locus = str(locus_num)
         new_locus = locus_tup[1] + new_locus
         new_locus_numbers.append(new_locus)
     return new_locus_numbers
+
+
+def find_upstream(locus_tup: tuple) -> list:
+    i = 0
+    new_locus_numbers = []
+    locus_numbers = locus_tup[0]
+    j = 0
+    if locus_numbers[0] == "0":
+        for j in range(len(locus_numbers)):
+            j += 1
+            if locus_numbers[j] != "0":
+                break
+    locus_num = int(locus_numbers)
+    while i < 10:
+        i += 1
+        locus_num -= 5
+        if j > 0:
+            new_locus = handle_leading_zeroes(locus_num, j)
+        else:
+            new_locus = str(locus_num)
+        new_locus = locus_tup[1] + new_locus
+        new_locus_numbers.append(new_locus)
+    return new_locus_numbers
+
+
+def handle_leading_zeroes(locus_numbers: int, num_zeroes: int) -> str:
+    locus_numbers = str(locus_numbers)
+    for i in range(num_zeroes):
+        locus_numbers = "0" + locus_numbers
+    return locus_numbers
 
 
 def find_protein_products(locus_tags: list) -> list:
@@ -137,7 +164,6 @@ def find_protein_products(locus_tags: list) -> list:
                             protein_products.append((locus,
                                                      feature.qualifiers
                                                      ["product"][0]))
-
     return protein_products
 
 

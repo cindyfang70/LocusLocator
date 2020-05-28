@@ -11,7 +11,9 @@ if user_choice == "2":
                              "you would like to locate.")
     print("Parsing...", flush=True)
     ids = qblast(protein_sequence)
+    print(ids, flush=True)
     refseqs = blastp(protein_sequence)
+    print(refseqs, flush=True)
     get_genomes(ids)
     results = find_refseq_matches_in_genome(refseqs, filename)
     print(results)
@@ -39,11 +41,8 @@ elif user_choice == "1":
     for file in all_files:
         result = find_refseq_matches_in_genome(refseqs, file)
         results.append(result)
-    print(results)
     for result in results:
-        print(result)
-        print(result[0][1])
-        print("upstream locus tags for", result[0][0], ":")
+        print("Upstream locus tags for", result[0][0], ":")
         print(find_protein_products(find_upstream(convert_to_int(result[0][1]))))
-        print("downstream locus tags for", result[0][0], ":")
+        print("Downstream locus tags for", result[0][0], ":")
         print(find_protein_products(find_downstream(convert_to_int(result[0][1]))))
